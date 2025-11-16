@@ -1,0 +1,146 @@
+// MainWindow.xaml.cs (HostAppWpf)
+
+using System;
+using System.Windows;
+using System.Windows.Controls; // Для Button, CheckBox, TextBlock, TextBox
+using System.Windows.Media;   // Для Brushes, Colors
+using System.Reflection;      // Для рефлексии
+using System.IO;              // Для работы с путями
+
+namespace HostAppWpf
+{
+    public partial class MainWindow : Window
+    {
+        private object _stylePluginInstance; // Экземпляр объекта из DLL
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            // Загружаем плагин при запуске
+            LoadStylePlugin();
+        }
+
+        private void LoadStylePlugin()
+        {
+            try
+            {
+                // Путь к DLL файлу вашего плагина.
+                // Убедитесь, что DLL находится в папке bin/Debug или bin/Release.
+                string pluginFileName = "StylePluginWpf.dll"; // Имя DLL для WPF
+                string pluginPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, pluginFileName);
+
+                if (!File.Exists(pluginPath))
+                {
+                    labelStatus.Text = $"Ошибка: Файл плагина '{pluginFileName}' не найден по пути {pluginPath}";
+                    _stylePluginInstance = null;
+                    return;
+                }
+
+                // Загружаем сборку (DLL)
+                Assembly pluginAssembly = Assembly.LoadFile(pluginPath);
+
+                // Ищем тип (класс) с именем "StyleManager" в этой сборке
+                Type styleManagerType = pluginAssembly.GetType("StylePluginWpf.StyleManager");
+
+                if (styleManagerType != null)
+                {
+                    // Создаем экземпляр этого типа
+                    _stylePluginInstance = Activator.CreateInstance(styleManagerType);
+
+                    // Ищем метод "SetTargetWindow" и вызываем его, передавая текущее окно
+                    MethodInfo setTargetWindowMethod = styleManagerType.GetMethod("SetTargetWindow");
+                    if (setTargetWindowMethod != null)
+                    {
+                        setTargetWindowMethod.Invoke(_stylePluginInstance, new object[] { this });
+                        labelStatus.Text = "Плагин стилей загружен.";
+                    }
+                    else
+                    {
+                        labelStatus.Text = "Ошибка: Метод SetTargetWindow не найден в плагине.";
+                        _stylePluginInstance = null;
+                    }
+                }
+                else
+                {
+                    labelStatus.Text = "Ошибка: Класс StyleManager не найден в плагине.";
+                }
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = $"Ошибка загрузки плагина: {ex.Message}";
+                _stylePluginInstance = null;
+            }
+        }
+
+        private void buttonAction_Click(object sender, RoutedEventArgs e)
+        {
+            string inputText = textBoxInput.Text;
+            MessageBox.Show($"Вы ввели: {inputText}", "Действие выполнено", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void checkBoxStyle_Checked(object sender, RoutedEventArgs e)
+        {
+            ApplyStyleFromPlugin(true);
+        }
+
+        private void checkBoxStyle_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ApplyStyleFromPlugin(false);
+        }
+
+        private void DebugPluginButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Просто вызов для проверки, что плагин реагирует
+            if (_stylePluginInstance != null)
+            {
+                try
+                {
+                    MethodInfo debugMethod = _stylePluginInstance.GetType().GetMethod("DebugAction");
+                    if (debugMethod != null)
+                    {
+                        debugMethod.Invoke(_stylePluginInstance, null);
+                        labelStatus.Text = "Тест плагина пройден.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    labelStatus.Text = $"Ошибка теста плагина: {ex.Message}";
+                }
+            }
+            else
+            {
+                labelStatus.Text = "Плагин не загружен для теста.";
+            }
+        }
+
+        private void ApplyStyleFromPlugin(bool applyNewStyle)
+        {
+            if (_stylePluginInstance != null)
+            {
+                try
+                {
+                    // Ищем метод, который будет переключать стили
+                    MethodInfo toggleStyleMethod = _stylePluginInstance.GetType().GetMethod("ToggleStyle");
+                    if (toggleStyleMethod != null)
+                    {
+                        // Вызываем метод из плагина, передавая ему состояние чекбокса
+                        toggleStyleMethod.Invoke(_stylePluginInstance, new object[] { applyNewStyle });
+                        labelStatus.Text = applyNewStyle ? "Применен другой стиль." : "Стандартный стиль.";
+                    }
+                    else
+                    {
+                        labelStatus.Text = "Ошибка: Метод ToggleStyle не найден в плагине.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    labelStatus.Text = $"Ошибка применения стиля: {ex.Message}";
+                }
+            }
+            else
+            {
+                labelStatus.Text = "Плагин стилей не загружен.";
+            }
+        }
+    }
+}
