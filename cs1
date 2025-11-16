@@ -1,0 +1,77 @@
+using System;
+using System.Runtime.InteropServices; // Для использования DllImport
+using System.Threading;             // Для Thread.Sleep
+
+public class ApiSoundGenerator
+{
+    // Импорт функций из Windows API
+    [DllImport("kernel32.dll")]
+    public static extern bool Beep(uint dwFreq, uint dwDuration);
+
+    [DllImport("user32.dll")]
+    public static extern bool MessageBeep(uint uType);
+
+    // Константы для MessageBeep (можно выбрать любую)
+    public const uint MB_OK = 0x00000000;       // Стандартный звук OK
+    public const uint MB_ICONERROR = 0x00000010; // Звук ошибки
+    public const uint MB_ICONWARNING = 0x00000030; // Звук предупреждения
+    public const uint MB_ICONQUESTION = 0x00000020; // Звук вопроса
+    public const uint MB_ICONINFORMATION = 0x00000040; // Звук информации
+
+    public static void Main(string[] args)
+    {
+        Console.WriteLine("Генератор звуковых сигналов с использованием Windows API.");
+        Console.WriteLine("Нажмите любую клавишу для начала...");
+        Console.ReadKey();
+
+        // --- Пример использования Beep ---
+        Console.WriteLine("\n--- Использование Beep ---");
+        // Частота: 1000 Гц (примерно тон "ля" первой октавы)
+        // Длительность: 500 миллисекунд
+        uint frequency = 1000;
+        uint duration = 500;
+
+        Console.WriteLine($"Проигрывается сигнал Beep: частота={frequency} Гц, длительность={duration} мс");
+        Beep(frequency, duration);
+        Thread.Sleep(1000); // Пауза 1 секунда
+
+        Console.WriteLine($"Проигрывается сигнал Beep: частота={frequency * 2} Гц, длительность={duration / 2} мс");
+        Beep(frequency * 2, duration / 2); // Другая частота и длительность
+        Thread.Sleep(1000);
+
+        // --- Пример использования MessageBeep ---
+        Console.WriteLine("\n--- Использование MessageBeep ---");
+
+        Console.WriteLine("Проигрывается стандартный звук системы (OK)...");
+        MessageBeep(MB_OK);
+        Thread.Sleep(1000);
+
+        Console.WriteLine("Проигрывается звук ошибки...");
+        MessageBeep(MB_ICONERROR);
+        Thread.Sleep(1000);
+
+        Console.WriteLine("Проигрывается звук предупреждения...");
+        MessageBeep(MB_ICONWARNING);
+        Thread.Sleep(1000);
+
+        // --- Генерация набора сигналов через промежутки времени ---
+        Console.WriteLine("\n--- Генерация последовательности сигналов ---");
+        int numberOfBeeps = 5;
+        uint beepFrequency = 800;
+        uint beepDuration = 300;
+        int intervalMs = 700; // Интервал между сигналами в миллисекундах
+
+        Console.WriteLine($"Проигрывается {numberOfBeeps} сигналов Beep с частотой {beepFrequency} Гц, длительностью {beepDuration} мс, через {intervalMs} мс.");
+
+        for (int i = 0; i < numberOfBeeps; i++)
+        {
+            Console.WriteLine($"Сигнал №{i + 1}");
+            Beep(beepFrequency, beepDuration);
+            Thread.Sleep(intervalMs);
+        }
+
+        Console.WriteLine("\nГенерация сигналов завершена.");
+        Console.WriteLine("Нажмите любую клавишу для выхода.");
+        Console.ReadKey();
+    }
+}
