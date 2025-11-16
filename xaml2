@@ -1,0 +1,30 @@
+<!-- MainWindow.xaml (HostAppWpf) -->
+<Window x:Class="HostAppWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HostAppWpf"
+        mc:Ignorable="d"
+        Title="Host App (WPF)" Height="450" Width="500" Background="#FFDEDEDE">
+    <!-- Начальный цвет фона -->
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="textBlockPrompt" Grid.Row="0" Text="Введите текст:" Margin="0,0,0,5" FontSize="14"/>
+        <TextBox x:Name="textBoxInput" Grid.Row="1" Margin="0,0,0,10" FontSize="14" Padding="5"/>
+        <Button x:Name="buttonAction" Grid.Row="2" Content="Выполнить" Width="120" HorizontalAlignment="Left" Margin="0,0,0,10" FontSize="14" Click="buttonAction_Click"/>
+        <CheckBox x:Name="checkBoxStyle" Grid.Row="3" Content="Применить другой стиль" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,10" FontSize="14" Checked="checkBoxStyle_Checked" Unchecked="checkBoxStyle_Unchecked"/>
+        <TextBlock x:Name="labelStatus" Grid.Row="4" Text="Готов." FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+
+        <!-- Скрытая кнопка для отладки загрузки плагина -->
+        <Button Grid.Row="5" Content="Тест плагина" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="DebugPluginButton_Click" Width="100"/>
+    </Grid>
+</Window>
